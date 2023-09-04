@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<title>MOVIE FINDER</title>
+<link rel="stylesheet"
+	href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/mdb.min.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+	<header>
+		<nav
+			class="navbar-bottom navbar navbar-expand-lg navbar-dark fixed-top">
+			<div class="container">
+
+				<a class="navbar-brand" href="#">
+					<h3 class='my-auto'>
+						<span class="h2">M</span>ovie Finder
+					</h3>
+				</a>
+
+				<button class="navbar-toggler" type="button" data-toggle="collapse"
+					data-target="#basicExampleNav" aria-controls="basicExampleNav"
+					aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="basicExampleNav">
+
+					<ul class="navbar-nav mr-auto px-1">
+						<li class="nav-item active"><a class="nav-link" href="/">Home
+						</a></li>
+					</ul>
+
+					<form class="form-inline" method="post" action="/result">
+						<div class="md-form my-0">
+							<input class="form-control mr-sm-2" type="text"
+								placeholder="Search..." aria-label="Search" name="title">
+						</div>
+					</form>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<div class=""
+		style="background-image: url('https://images.pexels.com/photos/531321/pexels-photo-531321.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
+		<div
+			class="mask rgba-black-light justify-content-center align-items-center">
+			<div class="container custom-container">
+				<div class="row">
+					<div class="col-12 text-center">
+						<h1 class="display-4 text-white" th:text="${movie.title}"></h1>
+					</div>
+				</div>
+				<div class="row mt-2">
+					<div class="col-12 text-center">
+						<img th:src="@{{imgurl}(imgurl=${movie.poster})}"
+							alt="MOVIE POSTER" class=" mx-auto d-block">
+					</div>
+				</div>
+				<div class="d-flex justify-content-center mt-2">
+					<div
+						class="rounded-circle text-white text-center border border-white p-2 h5">R</div>
+					<div
+						class='text-white p-2 font-weight-bold h5-responsive ml-2 mr-1'
+						th:text="${movie.released}">-</div>
+					<div class='text-white p-2 font-weight-bold h5-responsive '
+						th:text="${movie.runtime}">-</div>
+				</div>
+			</div>
+			<div class="container">
+				<div class="row mt-4">
+					<div class="col-12 text-center">
+						<div class="card details-card py-2">
+							<div class="rgba-black-light">
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Director</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.director}">-</div>
+									</div>
+								</div>
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Language(s)</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.language}">-</div>
+									</div>
+								</div>
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Actors</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.actors}">-</div>
+									</div>
+								</div>
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Writer(s)</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.writer}">-</div>
+									</div>
+								</div>
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Plot</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.plot}">-</div>
+									</div>
+								</div>
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Award(s)</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.awards}">-</div>
+									</div>
+								</div>
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Rating</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.imdbRating}">-</div>
+									</div>
+								</div>
+								<div class="row my-3">
+									<div class="col-4">
+										<div class="h6 text-white">Production</div>
+									</div>
+									<div class="col-8">
+										<div class="text-white" th:text="${movie.production}">-</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="footer-copyright text-center py-2 black mt-2 text-white">
+				<div>
+					© 2023 Copyright: <a target='_blank'
+						href="https://github.com/hmehdi/OMBD-Service">https://github.com/hmehdi/OMBD-Service</a>
+				</div>
+				<div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/popper.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		//changing padding of navbar on scroll
+		$(window).scroll(function() {
+			let position = $(this).scrollTop();
+			if (position >= 100) {
+				$('.navbar').addClass('custom-navigation-bar');
+			} else {
+				$('.navbar').removeClass('custom-navigation-bar');
+			}
+		});
+	</script>
+
+</body>
+
+</html>
