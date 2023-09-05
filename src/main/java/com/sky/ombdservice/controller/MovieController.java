@@ -1,11 +1,12 @@
 package com.sky.ombdservice.controller;
 
-import com.sky.ombdservice.models.ApiResponse;
-import com.sky.ombdservice.models.Movie;
+import com.sky.ombdservice.controller.dto.ApiResponse;
+import com.sky.ombdservice.controller.dto.movie.MovieDto;
+import com.sky.ombdservice.controller.dto.movie.MovieMapper;
 import com.sky.ombdservice.service.ApiResponseService;
 import com.sky.ombdservice.service.MovieService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,16 +15,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/movies")
+@AllArgsConstructor
+
 public class MovieController {
 
+    private MovieMapper movieMapper;
     private final MovieService movieService;
     private final ApiResponseService apiResponseService;
-
-    @Autowired
-    public MovieController(MovieService movieService, ApiResponseService apiResponseService) {
-        this.movieService = movieService;
-        this.apiResponseService = apiResponseService;
-    }
 
     /**
      * Retrieve a list of all movies.
@@ -37,12 +35,11 @@ public class MovieController {
      * - If no movies are found, a "404 Not Found" response with an error message is returned.
      */
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<Movie>>> getAllMovies() {
-        Optional<List<Movie>> moviesOptional = movieService.getAllMovies();
+    public ResponseEntity<ApiResponse<List<MovieDto>>> getAllMovies() {
+        val moviesOptional = movieService.getAllMovies();
 
         if (moviesOptional.isPresent()) {
-            List<Movie> movies = moviesOptional.get();
-            return apiResponseService.buildResponse(true, "Movies found", movies);
+            return apiResponseService.buildResponse(true, "Movies found", movieMapper.entityToDTO(moviesOptional.get()));
         } else {
             return apiResponseService.buildErrorResponse(false, "No movies found");
         }
@@ -62,12 +59,11 @@ public class MovieController {
      */
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Movie>> getMovieById(@PathVariable Long id) {
-        Optional<Movie> movieOptional = movieService.getMovieById(id);
+    public ResponseEntity<ApiResponse<MovieDto>> getMovieById(@PathVariable Long id) {
+        val movieOptional = movieService.getMovieById(id);
 
         if (movieOptional.isPresent()) {
-            Movie movie = movieOptional.get();
-            return apiResponseService.buildResponse(true, "Movie found", movie);
+            return apiResponseService.buildResponse(true, "Movie found", movieMapper.entityToDTO(movieOptional.get()));
         } else {
             return apiResponseService.buildErrorResponse(false, "Movie not found for id: " + id);
         }

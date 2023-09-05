@@ -29,13 +29,12 @@ public record MovieService(UrlGenerator urlGenerator,
             return ResponseEntity.notFound().build();
         return ResponseEntity.ok(movieDto);
     }
+
+
     public Optional<List<Movie>> getAllMovies() {
         List<Movie> movies = movieRepository.findAll();
         return Optional.ofNullable(movies);
     }
-//    public List<Movie> getAllMovies() {
-//        return movieRepository.findAll();
-//    }
 
     public Optional<Movie> getMovieById(Long id) {
         return movieRepository.findById(id);

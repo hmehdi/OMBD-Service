@@ -1,6 +1,6 @@
 package com.sky.ombdservice.service;
 
-import com.sky.ombdservice.models.ApiResponse;
+import com.sky.ombdservice.controller.dto.ApiResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

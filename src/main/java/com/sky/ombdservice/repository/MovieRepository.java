@@ -13,4 +13,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     // Custom query method to find movies by title and release year
     Optional<Movie> findByTitleAndYear(String title, String year);
 
+    List<Movie> findMovieByTitleContaining(String title);
+
 }

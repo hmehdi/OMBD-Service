@@ -1,6 +1,8 @@
 package com.sky.ombdservice;
 import com.sky.ombdservice.controller.MovieController;
-import com.sky.ombdservice.models.ApiResponse;
+import com.sky.ombdservice.controller.dto.ApiResponse;
+import com.sky.ombdservice.controller.dto.movie.MovieDto;
+import com.sky.ombdservice.controller.dto.movie.MovieMapper;
 import com.sky.ombdservice.models.Movie;
 import com.sky.ombdservice.service.ApiResponseService;
 import com.sky.ombdservice.service.MovieService;
@@ -26,12 +28,15 @@ public class MovieControllerTest {
     private MovieService movieService;
 
     @Mock
+    private MovieMapper movieMapper;
+
+    @Mock
     private ApiResponseService apiResponseService;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        movieController = new MovieController(movieService, apiResponseService);
+        movieController = new MovieController(movieMapper, movieService, apiResponseService);
     }
 
     @Test
@@ -41,13 +46,12 @@ public class MovieControllerTest {
         movies.add(new Movie(1L, "Movie 1", "2022"));
         movies.add(new Movie(2L, "Movie 2", "2023"));
 
-        when(movieService.getAllMovies()).thenReturn(Optional.of(movies));
-
         ApiResponse<List<Movie>> expectedApiResponse = new ApiResponse<>(true, "Movies found", movies);
         ResponseEntity<ApiResponse<List<Movie>>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
 
         // When
-        ResponseEntity<ApiResponse<List<Movie>>> responseEntity = movieController.getAllMovies();
+        when(movieService.getAllMovies()).thenReturn(Optional.of(movies));
+        ResponseEntity<ApiResponse<List<MovieDto>>> responseEntity = movieController.getAllMovies();
 
         // Then
         assertThat(responseEntity).isEqualTo(expectedResponseEntity);
@@ -64,7 +68,7 @@ public class MovieControllerTest {
                 .body(expectedApiResponse);
 
         // When
-        ResponseEntity<ApiResponse<List<Movie>>> responseEntity = movieController.getAllMovies();
+        ResponseEntity<ApiResponse<List<MovieDto>>> responseEntity = movieController.getAllMovies();
 
         // Then
         assertThat(responseEntity).isEqualTo(expectedResponseEntity);
@@ -83,7 +87,7 @@ public class MovieControllerTest {
         ResponseEntity<ApiResponse<Movie>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
 
         // When
-        ResponseEntity<ApiResponse<Movie>> responseEntity = movieController.getMovieById(movieId);
+        ResponseEntity<ApiResponse<MovieDto>> responseEntity = movieController.getMovieById(movieId);
 
         // Then
         assertThat(responseEntity).isEqualTo(expectedResponseEntity);
@@ -102,7 +106,7 @@ public class MovieControllerTest {
                 .body(expectedApiResponse);
 
         // When
-        ResponseEntity<ApiResponse<Movie>> responseEntity = movieController.getMovieById(movieId);
+        ResponseEntity<ApiResponse<MovieDto>> responseEntity = movieController.getMovieById(movieId);
 
         // Then
         assertThat(responseEntity).isEqualTo(expectedResponseEntity);

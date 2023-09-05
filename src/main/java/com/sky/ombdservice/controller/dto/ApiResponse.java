@@ -1,4 +1,4 @@
-package com.sky.ombdservice.models;
+package com.sky.ombdservice.controller.dto;
 
 import lombok.Getter;
 import lombok.Setter;
