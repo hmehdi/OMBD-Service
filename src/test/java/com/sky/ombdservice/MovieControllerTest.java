@@ -1,65 +1,111 @@
 package com.sky.ombdservice;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sky.ombdservice.controller.MovieController;
+import com.sky.ombdservice.models.ApiResponse;
 import com.sky.ombdservice.models.Movie;
+import com.sky.ombdservice.service.ApiResponseService;
 import com.sky.ombdservice.service.MovieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(MovieController.class)
 public class MovieControllerTest {
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    private MockMvc mockMvc;
+    private MovieController movieController;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private MovieService movieService;
 
+    @Mock
+    private ApiResponseService apiResponseService;
+
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        movieController = new MovieController(movieService, apiResponseService);
     }
 
     @Test
-    public void testGetAllMovies() throws Exception {
+    public void testGetAllMovies_WhenMoviesExist_ThenReturnListOfMovies() {
+        // Given
         List<Movie> movies = new ArrayList<>();
-        // Add mock movies to the list
+        movies.add(new Movie(1L, "Movie 1", "2022"));
+        movies.add(new Movie(2L, "Movie 2", "2023"));
 
-        when(movieService.getAllMovies()).thenReturn(movies);
+        when(movieService.getAllMovies()).thenReturn(Optional.of(movies));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("//api/movies/all"))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+        ApiResponse<List<Movie>> expectedApiResponse = new ApiResponse<>(true, "Movies found", movies);
+        ResponseEntity<ApiResponse<List<Movie>>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
+
+        // When
+        ResponseEntity<ApiResponse<List<Movie>>> responseEntity = movieController.getAllMovies();
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildResponse(true, "Movies found", movies);
     }
 
     @Test
-    public void testGetMovieById() throws Exception {
-        long movieId = 466L; // Replace with a valid movie ID
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/movies/{id}", movieId))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
+    public void testGetAllMovies_WhenNoMoviesExist_ThenReturnNotFound() {
+        // Given
+        when(movieService.getAllMovies()).thenReturn(Optional.empty());
+
+        ApiResponse<List<Movie>> expectedApiResponse = new ApiResponse<>(false, "No movies found",null);
+        ResponseEntity<ApiResponse<List<Movie>>> expectedResponseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(expectedApiResponse);
+
+        // When
+        ResponseEntity<ApiResponse<List<Movie>>> responseEntity = movieController.getAllMovies();
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildErrorResponse(false, "No movies found");
     }
 
+    @Test
+    public void testGetMovieById_WhenMovieExists_ThenReturnMovie() {
+        // Given
+        Long movieId = 1L;
+        Movie movie = new Movie(movieId, "Movie 1", "2022");
+
+        when(movieService.getMovieById(movieId)).thenReturn(Optional.of(movie));
+
+        ApiResponse<Movie> expectedApiResponse = new ApiResponse<>(true, "Movie found", movie);
+        ResponseEntity<ApiResponse<Movie>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
+
+        // When
+        ResponseEntity<ApiResponse<Movie>> responseEntity = movieController.getMovieById(movieId);
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildResponse(true, "Movie found", movie);
+    }
+
+    @Test
+    public void testGetMovieById_WhenMovieDoesNotExist_ThenReturnNotFound() {
+        // Given
+        Long movieId = 1L;
+
+        when(movieService.getMovieById(movieId)).thenReturn(Optional.empty());
+
+        ApiResponse<Movie> expectedApiResponse = new ApiResponse<>(false, "Movie not found for id: " + movieId,null);
+        ResponseEntity<ApiResponse<Movie>> expectedResponseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(expectedApiResponse);
+
+        // When
+        ResponseEntity<ApiResponse<Movie>> responseEntity = movieController.getMovieById(movieId);
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildErrorResponse(false, "Movie not found for id: " + movieId);
+    }
 }

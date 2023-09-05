@@ -5,7 +5,6 @@ import com.sky.ombdservice.models.OscarWinner;
 import com.sky.ombdservice.repository.MovieRepository;
 import com.sky.ombdservice.repository.OscarWinnerRepository;
 import com.sky.ombdservice.utility.UrlGenerator;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,13 +15,10 @@ import org.springframework.http.ResponseEntity;
 
 
 @Service
-@AllArgsConstructor
-public class MovieService {
-
-    private final UrlGenerator urlGenerator;
-    private final RestTemplate restTemplate;
-    private final MovieRepository movieRepository;
-    private final OscarWinnerRepository oscarWinnerRepository;
+public record MovieService(UrlGenerator urlGenerator,
+                           RestTemplate restTemplate,
+                           MovieRepository movieRepository,
+                           OscarWinnerRepository oscarWinnerRepository) {
 
     public ResponseEntity<Movie> find(final String movieTitle) {
         var url = urlGenerator.generate(movieTitle);
@@ -33,34 +29,29 @@ public class MovieService {
             return ResponseEntity.notFound().build();
         return ResponseEntity.ok(movieDto);
     }
+    public Optional<List<Movie>> getAllMovies() {
+        List<Movie> movies = movieRepository.findAll();
+        return Optional.ofNullable(movies);
+    }
+//    public List<Movie> getAllMovies() {
+//        return movieRepository.findAll();
+//    }
 
-    public List<Movie> getAllMovies() {
-        return movieRepository.findAll();
+    public Optional<Movie> getMovieById(Long id) {
+        return movieRepository.findById(id);
     }
 
-    public Movie getMovieById(Long id) {
-        Optional<Movie> movieOptional = movieRepository.findById(id);
-        return movieOptional.orElse(null);
-    }
-
-    public boolean hasWonBestPicture(Long id) {
+    public Optional<Boolean> hasWonBestPicture(Long id) {
         Optional<Movie> movieOptional = movieRepository.findById(id);
 
-        if (movieOptional.isPresent()) {
-            Movie movie = movieOptional.get();
+        return movieOptional.map(movie -> {
             List<OscarWinner> oscarWinners = oscarWinnerRepository.findByNameAndOscarYear(
                     movie.getTitle(),
                     movie.getYear()
             );
 
-            // Check if any entry in oscarWinners has won the Best Picture Oscar
-            for (OscarWinner oscarWinner : oscarWinners) {
-                if (oscarWinner.isBestPictureWinner()) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+            return oscarWinners.stream()
+                    .anyMatch(OscarWinner::isBestPictureWinner);
+        });
     }
 }

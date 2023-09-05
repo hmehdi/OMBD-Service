@@ -79,5 +79,9 @@ public class Movie {
         this.year = year;
     }
 
-
+    public Movie(Long id, String title, String year) {
+        this.id=id;
+        this.title = title;
+        this.year = year;
+    }
 }
