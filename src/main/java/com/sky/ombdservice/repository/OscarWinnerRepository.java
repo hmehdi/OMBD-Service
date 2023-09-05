@@ -31,7 +31,7 @@ public interface OscarWinnerRepository extends JpaRepository<OscarWinner, Long> 
     List<OscarWinner> findByNameAndOscarYear(String name, String oscarYear);
 
 
-    // List<OscarWinner> findByAgeGreaterThan(int age);
+    List<OscarWinner> findByAgeGreaterThan(int age);
 
     List<OscarWinner> findByMovieAndOscarYearAndAward(String movie, String oscarYear, String award);
 
