@@ -1,5 +1,8 @@
 package com.sky.ombdservice.controller;
 
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.sky.ombdservice.controller.dto.ApiResponse;
 import com.sky.ombdservice.controller.dto.movie.MovieDto;
 import com.sky.ombdservice.controller.dto.movie.MovieMapper;
@@ -7,16 +10,12 @@ import com.sky.ombdservice.controller.response.ApiResponseService;
 import com.sky.ombdservice.service.MovieService;
 import lombok.AllArgsConstructor;
 import lombok.val;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/movies")
 @AllArgsConstructor
-
 public class MovieController {
 
     private MovieMapper movieMapper;
@@ -39,7 +38,8 @@ public class MovieController {
         val moviesOptional = movieService.getAllMovies();
 
         if (moviesOptional.isPresent()) {
-            return apiResponseService.buildResponse(true, "Movies found", movieMapper.entityToDTO(moviesOptional.get()));
+            val movieDtos = movieMapper.entityToDTO(moviesOptional.get());
+            return apiResponseService.buildResponse(true, "Movies found", movieDtos);
         } else {
             return apiResponseService.buildErrorResponse(false, "No movies found");
         }
@@ -63,7 +63,8 @@ public class MovieController {
         val movieOptional = movieService.getMovieById(id);
 
         if (movieOptional.isPresent()) {
-            return apiResponseService.buildResponse(true, "Movie found", movieMapper.entityToDTO(movieOptional.get()));
+            val movieDto = movieMapper.entityToDTO(movieOptional.get());
+            return apiResponseService.buildResponse(true, "Movie found", movieDto);
         } else {
             return apiResponseService.buildErrorResponse(false, "Movie not found for id: " + id);
         }
