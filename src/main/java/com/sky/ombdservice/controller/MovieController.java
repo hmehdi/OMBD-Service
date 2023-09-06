@@ -18,7 +18,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class MovieController {
 
-    private MovieMapper movieMapper;
+    private final MovieMapper movieMapper;
     private final MovieService movieService;
     private final ApiResponseService apiResponseService;
 

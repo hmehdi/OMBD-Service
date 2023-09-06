@@ -1,8 +1,10 @@
 package com.sky.ombdservice.service;
 
+import com.sky.ombdservice.models.Movie;
 import com.sky.ombdservice.models.OscarWinner;
 import com.sky.ombdservice.repository.OscarWinnerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.micrometer.common.util.StringUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,71 +13,67 @@ import java.util.Optional;
 @Service
 public record OscarWinnerService(OscarWinnerRepository oscarWinnerRepository) {
 
-    @Autowired
-    public OscarWinnerService {
+    public Optional<List<OscarWinner>> getAllOscarWinners() {
+        List<OscarWinner> oscarWinners =  oscarWinnerRepository.findAll();
+        return Optional.ofNullable(oscarWinners);
     }
 
-    // Method to retrieve all Oscar winners
-    public List<OscarWinner> getAllOscarWinners() {
-        return oscarWinnerRepository.findAll();
-    }
 
-    // Method to retrieve an Oscar winner by Id
     public Optional<OscarWinner> getOscarWinnerById(Long id) {
         return oscarWinnerRepository.findById(id);
     }
 
-    // Method to retrieve Oscar winners by movie name
-    public List<OscarWinner> getOscarWinnersByMovie(String movieName) {
-        return oscarWinnerRepository.findByMovie(movieName);
+    public Optional<List<OscarWinner>> getOscarWinnersByMovie(String movieName) {
+        List<OscarWinner> oscarWinners = oscarWinnerRepository.findByMovie(movieName);
+        return Optional.ofNullable(oscarWinners);
     }
 
-    // Method to retrieve Oscar winners by award category
-    public List<OscarWinner> getOscarWinnersByAward(String awardCategory) {
-        return oscarWinnerRepository.findByAward(awardCategory);
+    public Optional<List<OscarWinner>> getOscarWinnersByAward(String awardCategory) {
+        List<OscarWinner> oscarWinners = oscarWinnerRepository.findByAward(awardCategory);
+        return Optional.ofNullable(oscarWinners);
     }
 
-    // Method to add a new Oscar winner
-    public OscarWinner addOscarWinner(OscarWinner oscarWinner) {
-        // Add any necessary validation logic here before saving to the repository
-        return oscarWinnerRepository.save(oscarWinner);
-    }
 
-    // Method to update an existing Oscar winner
-    public OscarWinner updateOscarWinner(Long id, OscarWinner updatedOscarWinner) {
-        // Find the existing Oscar winner by ID
-        Optional<OscarWinner> existingOscarWinner = oscarWinnerRepository.findById(id);
-
-        if (existingOscarWinner.isPresent()) {
-            // Update the properties of the existing Oscar winner
-            OscarWinner oscarWinnerToUpdate = existingOscarWinner.get();
-            oscarWinnerToUpdate.setName(updatedOscarWinner.getName());
-            oscarWinnerToUpdate.setOscarYear(updatedOscarWinner.getOscarYear());
-            oscarWinnerToUpdate.setAward(updatedOscarWinner.getAward());
-            // Update other properties as needed
-
-            // Save the updated Oscar winner to the repository
-            return oscarWinnerRepository.save(oscarWinnerToUpdate);
+    public Optional<OscarWinner> addOscarWinner(OscarWinner oscarWinner) {
+        if (isOscarWinnerDataValid(oscarWinner)) {
+            OscarWinner addedOscarWinner = oscarWinnerRepository.save(oscarWinner);
+            return Optional.of(addedOscarWinner);
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 
+    private boolean isOscarWinnerDataValid(OscarWinner oscarWinner) {
+        return !StringUtils.isBlank(oscarWinner.getName())
+                && !StringUtils.isBlank(oscarWinner.getAward())
+                && oscarWinner.getOscarYear() != null;
+    }
 
-    // Method to delete an Oscar winner by ID
-    public void deleteOscarWinner(Long id) {
-        // Check if the Oscar winner with the given ID exists
+    public Optional<OscarWinner> updateOscarWinner(Long id, OscarWinner updatedOscarWinner) {
+        return oscarWinnerRepository.findById(id)
+                .map(existingOscarWinner -> {
+                    existingOscarWinner.setName(updatedOscarWinner.getName());
+                    existingOscarWinner.setOscarYear(updatedOscarWinner.getOscarYear());
+                    existingOscarWinner.setAward(updatedOscarWinner.getAward());
+                    return oscarWinnerRepository.save(existingOscarWinner);
+                });
+    }
+
+    public Optional<Boolean> deleteOscarWinnerById(Long id) {
         Optional<OscarWinner> existingOscarWinner = oscarWinnerRepository.findById(id);
 
         if (existingOscarWinner.isPresent()) {
-            // If it exists, delete the Oscar winner from the repository
             oscarWinnerRepository.deleteById(id);
+            return Optional.of(true); // Deletion successful
+        } else {
+            return Optional.empty();
         }
     }
 
-    public boolean isBestPictureWinner(String movie, String oscarYear) {
+    public Optional<Boolean> isBestPictureWinner(String movie, String oscarYear) {
         List<OscarWinner> bestPictureWinners = oscarWinnerRepository.findByMovieAndOscarYearAndAward(movie, oscarYear, "Best Picture");
-        return !bestPictureWinners.isEmpty();
+        return Optional.of(!bestPictureWinners.isEmpty());
     }
+
 }
 

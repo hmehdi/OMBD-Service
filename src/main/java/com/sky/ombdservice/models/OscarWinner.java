@@ -57,11 +57,12 @@ public class OscarWinner {
         // Default constructor required by JPA
     }
 
-    public OscarWinner(long id,String name, String oscarYear, String award) {
+    public OscarWinner(long id, String name, String movie, String award,String oscarYear) {
         this.id= id;
-        this.name = name;
-        this.oscarYear = oscarYear;
-        this.award = award;
+        this.name= name;
+        this.movie= movie;
+        this.award= award;
+        this.oscarYear= oscarYear;
     }
 
 

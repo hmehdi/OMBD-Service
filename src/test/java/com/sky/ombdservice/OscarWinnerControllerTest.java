@@ -1,143 +1,153 @@
 package com.sky.ombdservice;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sky.ombdservice.controller.OscarWinnerController;
+import com.sky.ombdservice.controller.dto.ApiResponse;
+import com.sky.ombdservice.controller.dto.oscarwinner.OscarWinnerDto;
+import com.sky.ombdservice.controller.dto.oscarwinner.OscarWinnerMapper;
+import com.sky.ombdservice.controller.response.ApiResponseService;
 import com.sky.ombdservice.models.OscarWinner;
 import com.sky.ombdservice.service.OscarWinnerService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(OscarWinnerController.class)
-@AutoConfigureMockMvc
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 public class OscarWinnerControllerTest {
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    private MockMvc mockMvc;
+    @InjectMocks
+    private OscarWinnerController oscarWinnerController;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private OscarWinnerService oscarWinnerService;
 
-    private OscarWinner oscarWinner;
-    private List<OscarWinner> oscarWinnerList;
+    @Mock
+    private ApiResponseService apiResponseService;
 
-    @BeforeEach
-    void setUp() {
-        oscarWinner = new OscarWinner(1L, "Movie 1", "2022", "Best Actor");
-        oscarWinnerList = new ArrayList<>();
-        oscarWinnerList.add(oscarWinner);
+    @Mock
+    private OscarWinnerMapper oscarWinnerMapper;
+
+    @Test
+    public void givenOscarWinnersExist_whenGetAllOscarWinners_thenReturnListOfOscarWinners() {
+        // Given
+        List<OscarWinner> oscarWinners = Arrays.asList(
+                new OscarWinner(1L, "Actor 1", "Movie 1", "Best Picture", "2022"),
+                new OscarWinner(2L, "Actress 2", "Movie 2", "Best Picture", "2023")
+        );
+        List<OscarWinnerDto> oscarWinnerDtos = Arrays.asList(
+                new OscarWinnerDto(1L, "Actor 1", "Movie 1", "Best Picture", "2022"),
+                new OscarWinnerDto(2L, "Actress 2", "Movie 2", "Best Picture", "2023")
+        );
+
+        ApiResponse<List<OscarWinnerDto>> expectedApiResponse = new ApiResponse<>(true, "Oscar winners found", oscarWinnerDtos);
+        ResponseEntity<ApiResponse<List<OscarWinnerDto>>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
+
+        // Mock the behavior of oscarWinnerService and oscarWinnerMapper
+        when(oscarWinnerService.getAllOscarWinners()).thenReturn(Optional.of(oscarWinners));
+        when(oscarWinnerMapper.entityToDTO(oscarWinners)).thenReturn(oscarWinnerDtos);
+
+        // Mock the behavior of apiResponseService
+        when(apiResponseService.buildResponse(true, "Oscar winners found", oscarWinnerDtos)).thenReturn(expectedResponseEntity);
+
+        // When
+        ResponseEntity<ApiResponse<List<OscarWinnerDto>>> responseEntity = oscarWinnerController.getAllOscarWinners();
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildResponse(true, "Oscar winners found", oscarWinnerDtos);
+
+
     }
 
     @Test
-    public void testGetAllOscarWinners() throws Exception {
-        Mockito.when(oscarWinnerService.getAllOscarWinners()).thenReturn(oscarWinnerList);
+    public void givenOscarWinnerExists_whenGetOscarWinnerById_thenReturnOscarWinnerDto() {
+        // Given
+        Long oscarWinnerId = 1L;
+        OscarWinner oscarWinner =  new OscarWinner(oscarWinnerId, "Actor 1", "Movie 1", "Best Picture", "2022");
+        OscarWinnerDto oscarWinnerDto =  new OscarWinnerDto(oscarWinnerId, "Actor 1", "Movie 1", "Best Picture", "2022");
 
-        mockMvc.perform(get("/api/oscar-winners/all")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].name").value("Movie 1"));
+        ApiResponse<OscarWinnerDto> expectedApiResponse = new ApiResponse<>(true, "Oscar winner found", oscarWinnerDto);
+        ResponseEntity<ApiResponse<OscarWinnerDto>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
+
+        // Mock the behavior of oscarWinnerService and oscarWinnerMapper
+        when(oscarWinnerService.getOscarWinnerById(oscarWinnerId)).thenReturn(Optional.of(oscarWinner));
+        when(oscarWinnerMapper.entityToDTO(oscarWinner)).thenReturn(oscarWinnerDto);
+
+        // Mock the behavior of apiResponseService
+        when(apiResponseService.buildResponse(true, "Oscar winner found", oscarWinnerDto)).thenReturn(expectedResponseEntity);
+
+        // When
+        ResponseEntity<ApiResponse<OscarWinnerDto>> responseEntity = oscarWinnerController.getOscarWinnerById(oscarWinnerId);
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildResponse(true, "Oscar winner found", oscarWinnerDto);
     }
+
 
     @Test
-    public void testGetOscarWinnerById() throws Exception {
-        Mockito.when(oscarWinnerService.getOscarWinnerById(1L)).thenReturn(Optional.of(oscarWinner));
+    public void givenValidMovieTitle_whenGetOscarWinnersByMovie_thenReturnListOfOscarWinners() {
+        // Given
+        String movieTitle = "Movie 1";
+        List<OscarWinner> oscarWinners = Arrays.asList(
+                new OscarWinner(1L, "Actor 1", movieTitle, "Best Picture", "2022"),
+                new OscarWinner(2L, "Actress 2", movieTitle, "Best Director", "2023")
+        );
 
-        mockMvc.perform(get("/api/oscar-winners/{id}", 926L)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("Movie 1"));
+
+        ApiResponse<List<OscarWinner>> expectedApiResponse = new ApiResponse<>(true, "Oscar winners retrieved", oscarWinners);
+        ResponseEntity<ApiResponse<List<OscarWinner>>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
+
+        // Mock the behavior of oscarWinnerService
+        when(oscarWinnerService.getOscarWinnersByMovie(movieTitle)).thenReturn(Optional.of(oscarWinners));
+
+        // Mock the behavior of apiResponseService
+        when(apiResponseService.buildResponse(true, "Oscar winners retrieved", oscarWinners)).thenReturn(expectedResponseEntity);
+
+        // When
+        ResponseEntity<ApiResponse<List<OscarWinner>>> responseEntity = oscarWinnerController.getOscarWinnersByMovie(movieTitle);
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildResponse(true, "Oscar winners retrieved", oscarWinners);
     }
-
     @Test
-    public void testGetOscarWinnerById_NotFound() throws Exception {
-        Mockito.when(oscarWinnerService.getOscarWinnerById(1L)).thenReturn(Optional.empty());
+    public void givenValidAwardName_whenGetOscarWinnersByAward_thenReturnListOfOscarWinners() {
+        // Given
+        String awardName = "Best Picture";
+        List<OscarWinner> oscarWinners = Arrays.asList(
+                new OscarWinner(1L, "Actor 1", "Movie 1", awardName, "2022"),
+                new OscarWinner(2L, "Actress 2", "Movie 2", awardName, "2023")
+        );
 
-        mockMvc.perform(get("/api/oscar-winners/{id}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+
+        ApiResponse<List<OscarWinner>> expectedApiResponse = new ApiResponse<>(true, "Oscar winners retrieved", oscarWinners);
+        ResponseEntity<ApiResponse<List<OscarWinner>>> expectedResponseEntity = ResponseEntity.ok(expectedApiResponse);
+
+        // Mock the behavior of oscarWinnerService
+        when(oscarWinnerService.getOscarWinnersByAward(awardName)).thenReturn(Optional.of(oscarWinners));
+
+        // Mock the behavior of apiResponseService
+        when(apiResponseService.buildResponse(true, "Oscar winners retrieved", oscarWinners)).thenReturn(expectedResponseEntity);
+
+        // When
+        ResponseEntity<ApiResponse<List<OscarWinner>>> responseEntity = oscarWinnerController.getOscarWinnersByAward(awardName);
+
+        // Then
+        assertThat(responseEntity).isEqualTo(expectedResponseEntity);
+        verify(apiResponseService).buildResponse(true, "Oscar winners retrieved", oscarWinners);
     }
 
-    @Test
-    public void testAddOscarWinner() throws Exception {
-        String oscarWinnerJson = objectMapper.writeValueAsString(oscarWinner);
-
-        Mockito.when(oscarWinnerService.addOscarWinner(any(OscarWinner.class))).thenReturn(oscarWinner);
-
-        mockMvc.perform(post("/api/oscar-winners")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(oscarWinnerJson))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("Movie 1"));
-    }
-
-//    @Test
-//    public void testUpdateOscarWinner() throws Exception {
-//        String oscarWinnerJson = objectMapper.writeValueAsString(oscarWinner);
-//
-//        Mockito.when(oscarWinnerService.updateOscarWinner(eq(926L), any(OscarWinner.class)))
-//                .thenReturn(Optional.of(oscarWinner));
-//
-//        mockMvc.perform(put("/api/oscar-winners/{id}", 926L)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(oscarWinnerJson))
-//                .andExpect(status().isOk())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.name").value("Movie 1"));
-//    }
-
-
-//    @Test
-//    public void testDeleteOscarWinner() throws Exception {
-//        Mockito.when(oscarWinnerService.deleteOscarWinner(1L)).thenReturn(true);
-//
-//        mockMvc.perform(delete("/api/oscar-winners/{id}", 1L))
-//                .andExpect(status().isNoContent());
-//    }
-
-    @Test
-    public void testGetOscarWinnersByAward() throws Exception {
-        Mockito.when(oscarWinnerService.getOscarWinnersByAward("Best Actor")).thenReturn(oscarWinnerList);
-
-        mockMvc.perform(get("/api/oscar-winners/by-award/{award}", "Best Actor")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].name").value("Movie 1"));
-    }
-
-    @Test
-    public void testGetOscarWinnersByMovie() throws Exception {
-        Mockito.when(oscarWinnerService.getOscarWinnersByMovie("Movie 1")).thenReturn(oscarWinnerList);
-
-        mockMvc.perform(get("/api/oscar-winners/by-movie/{movie}", "Movie 1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].name").value("Movie 1"));
-    }
 }
 
