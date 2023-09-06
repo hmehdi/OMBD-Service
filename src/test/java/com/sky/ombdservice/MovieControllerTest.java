@@ -4,7 +4,7 @@ import com.sky.ombdservice.controller.dto.ApiResponse;
 import com.sky.ombdservice.controller.dto.movie.MovieDto;
 import com.sky.ombdservice.controller.dto.movie.MovieMapper;
 import com.sky.ombdservice.models.Movie;
-import com.sky.ombdservice.service.ApiResponseService;
+import com.sky.ombdservice.controller.response.ApiResponseService;
 import com.sky.ombdservice.service.MovieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

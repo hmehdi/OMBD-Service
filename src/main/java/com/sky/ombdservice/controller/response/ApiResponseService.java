@@ -1,4 +1,4 @@
-package com.sky.ombdservice.service;
+package com.sky.ombdservice.controller.response;
 
 import com.sky.ombdservice.controller.dto.ApiResponse;
 import lombok.AllArgsConstructor;

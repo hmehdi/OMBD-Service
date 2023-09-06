@@ -3,7 +3,7 @@ package com.sky.ombdservice.controller;
 import com.sky.ombdservice.controller.dto.ApiResponse;
 import com.sky.ombdservice.controller.dto.movie.MovieDto;
 import com.sky.ombdservice.controller.dto.movie.MovieMapper;
-import com.sky.ombdservice.service.ApiResponseService;
+import com.sky.ombdservice.controller.response.ApiResponseService;
 import com.sky.ombdservice.service.MovieService;
 import lombok.AllArgsConstructor;
 import lombok.val;
